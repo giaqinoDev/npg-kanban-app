@@ -1,0 +1,23 @@
+.column-container{
+    background-color: rgb(246, 246, 246);
+    margin: 10px;
+    width: 100%;
+    border-style: hidden;
+    border-radius: 8px;
+    box-sizing: border-box; 
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.column-header{
+    color: white;
+    padding: 10px;
+    display: flex;
+}
+.column-header p{
+    margin: 0px
+}
+.create-new-task-icon{
+    margin-left: auto;
+    cursor: pointer;
+}

@@ -1,0 +1,52 @@
+.modal-header{
+    display: flex;
+    align-items: center;
+}
+.modal-container{
+    width: 35dvw;
+    border-radius: 8px;
+    border-style: none;
+}
+.exit-modal-icon{
+    margin-left: auto;
+    width: 25px;
+    height: auto;
+    cursor: pointer;
+}
+.modal-input-field{
+    resize: vertical;
+    width: 100%;
+    height: 200px;
+    box-sizing: border-box;
+    font-size: medium;
+    padding: 10px;
+    border-style: dashed;
+    border-radius: 5px;
+    border-color: gray;
+    background-color: rgb(246, 246, 246);
+}
+.general-input-field{
+    display: flex;
+    align-items: center;
+}
+.general-input-field input{
+    width: 100%;
+    font-size: medium;
+}
+.general-input-field select{
+    width: 100%;
+    font-size: medium;
+    padding: 5px;
+}
+.general-input-field p{
+    margin-right: 50px;
+}
+.button-container{
+    display: flex;
+}
+.create-task-button{
+    padding: 10px;
+    margin: 5px;
+    margin-left: auto;
+    cursor: pointer;
+}

@@ -1,22 +1,26 @@
-import { useState } from "react"
-import { KanbanColumn } from "./column-component/KanbanColumn";
+import { useRef, useState } from "react"
+import { KanbanColumn, type ColumnId } from "./column-component/KanbanColumn";
 import { KanbanTask } from "./task-component/KanbanTask";
+import Column from "./column-component/Column";
+import "./App.css";
+import CreateTaskModal from "./modal-component/CreateTaskModal";
 
 function App() {
 
   const [columns, setColumns] = useState({
-    "todo": new KanbanColumn("To Do", [new KanbanTask("1", "Item 1"), new KanbanTask("2", "Item 2")]),
-    "inProgress": new KanbanColumn("In Progress", [new KanbanTask("3", "Item 3"), new KanbanTask("4", "Item 4")]),
-    "inReview": new KanbanColumn("In Review", [new KanbanTask("5", "Item 5"), new KanbanTask("6", "Item 6")]),
-    "done": new KanbanColumn("Done", [new KanbanTask("7", "Item 7"), new KanbanTask("8", "Item 8")])
+    "todo": new KanbanColumn("To Do", "todo", [new KanbanTask("1", "Item 1"), new KanbanTask("2", "Item 2")]),
+    "inProgress": new KanbanColumn("In Progress", "inProgress", [new KanbanTask("3", "Item 3"), new KanbanTask("4", "Item 4")]),
+    "inReview": new KanbanColumn("In Review", "inReview", [new KanbanTask("5", "Item 5"), new KanbanTask("6", "Item 6")]),
+    "done": new KanbanColumn("Done", "done", [new KanbanTask("7", "Item 7"), new KanbanTask("8", "Item 8")])
   });
   type DraggedItem = {
     columnId: keyof typeof columns,
     task: KanbanTask
   }
   const [newTask, setNewTask] = useState<KanbanTask | null>(null);
-  const [activeColumn, setActiveColumn] = useState<keyof typeof columns>("todo");
+  const [activeColumn, setActiveColumn] = useState<ColumnId>("todo");
   const [draggedTask, setDraggedTask] = useState<DraggedItem | null>(null);
+  const createTaskDialogRef = useRef<HTMLDialogElement>(null);
 
   function addNewTask(){
     if(!newTask || newTask.content.trim() == ""){
@@ -72,9 +76,16 @@ function App() {
     setDraggedTask(null);
   }
   return (
-    <>
-      <div>hello</div>
-    </>
+    <div id="app-container">
+      <div className="kanban-columns">
+        <Column columnInfo={columns["todo"]} headerColor="rgb(252, 70, 70)" createTaskDialogRef={createTaskDialogRef} setActiveColumn={setActiveColumn}/>
+        <Column columnInfo={columns["inProgress"]} headerColor="rgb(70, 106, 252)" createTaskDialogRef={createTaskDialogRef} setActiveColumn={setActiveColumn}/>
+        <Column columnInfo={columns["inReview"]} headerColor="rgb(252, 194, 70)" createTaskDialogRef={createTaskDialogRef} setActiveColumn={setActiveColumn}/>
+        <Column columnInfo={columns["done"]} headerColor="rgb(69, 255, 134)" createTaskDialogRef={createTaskDialogRef} setActiveColumn={setActiveColumn}/>
+      </div>
+
+      <CreateTaskModal ref={createTaskDialogRef} activeColumn={activeColumn} setActiveColumn={setActiveColumn}/>
+    </div>
   )
 }
 
