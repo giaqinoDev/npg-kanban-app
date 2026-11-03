@@ -21,9 +21,9 @@ function Task({task} : TaskProps){
     return (
        <div className="task-container">
             <p>{task.title}</p>
-            <div>
-                <IoCalendarClearOutline/>
-                <p>{formatDate(task.end_date)}</p>
+            <div style={{"display": "flex", "alignItems": "center"}}>
+                <IoCalendarClearOutline style={{"width":"15px", "height": "auto"}}/>
+                <p style={{"margin": "0px", "marginLeft":"5px", "fontSize":"small"}}>{formatDate(task.end_date)}</p>
             </div>
         </div>
     );

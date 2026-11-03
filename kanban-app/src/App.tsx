@@ -41,9 +41,7 @@ function App() {
         new KanbanTask("8", "Task 8", "done", "2026-11-01", "2026-11-01", "Item 8", "high", 1)])
   });
 
-  //const [newTask, setNewTask] = useState<KanbanTask | null>(null);
   const [activeColumn, setActiveColumn] = useState<ColumnId>("todo");
-  //const [draggedTask, setDraggedTask] = useState<DraggedItem | null>(null);
   const createTaskDialogRef = useRef<HTMLDialogElement>(null);
   function handleDragEnd(result: DropResult){
     const{source, destination} = result;
@@ -112,7 +110,6 @@ function App() {
         }
       }
     });
-    //setNewTask(null);
   }
 
   function removeTask(columnId : ColumnId, taskId : string){
