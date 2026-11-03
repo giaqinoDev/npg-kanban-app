@@ -18,10 +18,13 @@ function Column({columnInfo, headerColor, createTaskDialogRef, setActiveColumn} 
         <div className="column-container">
             <div className="column-header" style={{"backgroundColor": headerColor}}>
                 <p>{columnInfo.name}</p>
-                <FaPlus className="create-new-task-icon" onClick={() => {
-                    createTaskDialogRef.current?.showModal();
-                    setActiveColumn(columnInfo.id);
-                }}/>
+                <div style={{"marginLeft":"auto", "display":"flex"}}>
+                    <p style={{"marginRight":"10px"}}>{columnInfo.items.length}</p>
+                    <FaPlus className="create-new-task-icon" onClick={() => {
+                        createTaskDialogRef.current?.showModal();
+                        setActiveColumn(columnInfo.id);
+                    }}/>
+                </div>
             </div>
             <Droppable droppableId={columnInfo.id}>
                 {(provided: DroppableProvided) => {

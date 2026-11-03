@@ -11,7 +11,8 @@ interface TaskProps{
 function formatDate(date: string){
     const formattedDate = new Date(`${date}T12:00:00`).toLocaleDateString("en-US", {
         month: "short",
-        day: "numeric"
+        day: "numeric",
+        year: "numeric"
     });
 
     return formattedDate;
@@ -20,7 +21,12 @@ function formatDate(date: string){
 function Task({task} : TaskProps){
     return (
        <div className="task-container">
-            <p>{task.title}</p>
+            <div style={{"display":"flex", "alignItems":"cener"}}>
+                <p>{task.title}</p>
+                <div className="priority-tag" style={{"backgroundColor" : task.priority == "low" ? "#ffed63" : task.priority == "high" ? "#ff6750" : "#c9c9c9"}}>
+                    <p style={{"margin":"0px", "fontSize": "small"}}>{task.priority}</p>
+                </div>
+            </div>
             <div style={{"display": "flex", "alignItems": "center"}}>
                 <IoCalendarClearOutline style={{"width":"15px", "height": "auto"}}/>
                 <p style={{"margin": "0px", "marginLeft":"5px", "fontSize":"small"}}>{formatDate(task.end_date)}</p>

@@ -1,5 +1,5 @@
 .column-container{
-    background-color: rgb(237, 237, 237);
+    background-color: rgb(242, 242, 242);
     margin: 10px;
     width: 100%;
     border-style: hidden;
@@ -21,6 +21,5 @@
     margin: 0px
 }
 .create-new-task-icon{
-    margin-left: auto;
     cursor: pointer;
 }
