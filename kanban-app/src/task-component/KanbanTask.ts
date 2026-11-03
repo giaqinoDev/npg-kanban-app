@@ -1,11 +1,14 @@
+import type { ColumnId } from "../column-component/KanbanColumn";
+
+export type PriorityId = "low" | "medium" | "high";
 export class KanbanTask{
     id: string;
     title: string;
-    category: string;
-    priority: string;
+    category: ColumnId;
+    priority: PriorityId;
     content: string;
 
-    constructor(id: string, content: string, title: string, priority: string, category: string){
+    constructor(id: string, title: string, category: ColumnId, priority: PriorityId, content: string){
         this.id = id;
         this.title = title;
         this.category = category;

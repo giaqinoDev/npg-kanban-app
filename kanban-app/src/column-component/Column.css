@@ -9,6 +9,9 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
+.category-tasks{
+    height: 100%;
+}
 .column-header{
     color: white;
     padding: 10px;
