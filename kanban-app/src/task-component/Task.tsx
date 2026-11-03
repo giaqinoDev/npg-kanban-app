@@ -1,4 +1,6 @@
 import type { KanbanTask } from "./KanbanTask";
+import { IoCalendarClearOutline } from "react-icons/io5";
+
 import "./Task.css"
 interface TaskProps{
     task: KanbanTask
@@ -6,11 +8,23 @@ interface TaskProps{
     // handleDrop: (event: React.DragEvent<HTMLDivElement>, columnId: ColumnId) => void
 }
 
+function formatDate(date: string){
+    const formattedDate = new Date(`${date}T12:00:00`).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric"
+    });
+
+    return formattedDate;
+}
+
 function Task({task} : TaskProps){
     return (
        <div className="task-container">
             <p>{task.title}</p>
-            <p>{task.content}</p>
+            <div>
+                <IoCalendarClearOutline/>
+                <p>{formatDate(task.end_date)}</p>
+            </div>
         </div>
     );
 }

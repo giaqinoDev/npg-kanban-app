@@ -2,17 +2,18 @@ import type { FormEvent, RefObject } from "react";
 import { RxCross2 } from "react-icons/rx";
 import "./CreateTaskModal.css"
 import { RiPencilAiFill } from "react-icons/ri";
-import type { ColumnId } from "../column-component/KanbanColumn";
+import type { ColumnId, KanbanColumn } from "../column-component/KanbanColumn";
 import { KanbanTask, type PriorityId } from "../task-component/KanbanTask";
 
 interface CreateTaskModalProp{
     ref: RefObject<HTMLDialogElement | null>;
     activeColumn: ColumnId;
+    columnInfo: KanbanColumn;
     setActiveColumn: React.Dispatch<React.SetStateAction<ColumnId>>
     addNewTask: (newTask: KanbanTask|null) => void;
 }
 
-function CreateTaskModal({ref, activeColumn, setActiveColumn, addNewTask}: CreateTaskModalProp){
+function CreateTaskModal({ref, activeColumn, setActiveColumn, addNewTask, columnInfo}: CreateTaskModalProp){
 
     function handleCategoryChange(event: React.ChangeEvent<HTMLSelectElement>){
         setActiveColumn(event.target.value as ColumnId);
@@ -23,11 +24,14 @@ function CreateTaskModal({ref, activeColumn, setActiveColumn, addNewTask}: Creat
         const formData = new FormData(event.currentTarget);
 
         const newTask = new KanbanTask(
-            Date.now.toString(),
+            Date.now().toString(),
             formData.get("title") as string,
             formData.get("category") as ColumnId,
+            formData.get("start date") as string,
+            formData.get("end date") as string,
+            formData.get("description") as string,
             formData.get("priority") as PriorityId,
-            formData.get("description") as string
+            columnInfo.items.length
         );
 
         addNewTask(newTask);
@@ -60,6 +64,13 @@ function CreateTaskModal({ref, activeColumn, setActiveColumn, addNewTask}: Creat
                         <option value="medium" selected>Medium</option>
                         <option value="high">High</option>
                     </select>
+                </div>
+                <div className="general-input-field">
+                    <p>Start Date</p>
+                    <input name="start date" type="date" required></input>
+
+                    <p style={{"marginLeft": "20px"}}>End Date</p>
+                    <input name="end date" type="date" required></input>
                 </div>
                 <p>Description:</p>
                 <textarea name="description" className="modal-input-field" rows={5} cols={40} placeholder="Type your task..."></textarea>
