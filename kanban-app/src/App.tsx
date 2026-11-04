@@ -6,6 +6,7 @@ import "./App.css";
 import CreateTaskModal from "./modal-component/CreateTaskModal";
 import { DragDropContext } from "@hello-pangea/dnd";
 import type { DropResult } from "@hello-pangea/dnd";
+import ViewTaskModal from "./modal-component/ViewTaskModal";
 
 //Return copies of the tasks with their position (and category) matching their index in the column
 function reindexTasks(tasks: KanbanTask[], category: ColumnId): KanbanTask[]{
@@ -43,6 +44,9 @@ function App() {
 
   const [activeColumn, setActiveColumn] = useState<ColumnId>("todo");
   const createTaskDialogRef = useRef<HTMLDialogElement>(null);
+  const viewTaskDialogRef = useRef<HTMLDialogElement>(null);
+  const [activeTask, setActiveTask] = useState<KanbanTask|null>(null);
+
   function handleDragEnd(result: DropResult){
     const{source, destination} = result;
 
@@ -127,10 +131,34 @@ function App() {
       <div id="app-container">
         <DragDropContext onDragEnd={handleDragEnd}>
           <div className="kanban-columns">
-            <Column columnInfo={columns["todo"]} headerColor="rgb(252, 70, 70)" createTaskDialogRef={createTaskDialogRef} setActiveColumn={setActiveColumn}/>
-            <Column columnInfo={columns["inProgress"]} headerColor="rgb(70, 106, 252)" createTaskDialogRef={createTaskDialogRef} setActiveColumn={setActiveColumn}/>
-            <Column columnInfo={columns["inReview"]} headerColor="rgb(252, 194, 70)" createTaskDialogRef={createTaskDialogRef} setActiveColumn={setActiveColumn}/>
-            <Column columnInfo={columns["done"]} headerColor="rgb(39, 239, 136)" createTaskDialogRef={createTaskDialogRef} setActiveColumn={setActiveColumn}/>
+            <Column 
+              columnInfo={columns["todo"]} 
+              headerColor="rgb(252, 70, 70)" 
+              createTaskDialogRef={createTaskDialogRef} 
+              viewTaskDialogRef={viewTaskDialogRef}
+              setActiveColumn={setActiveColumn}
+              setActiveTask={setActiveTask}/>
+            <Column 
+              columnInfo={columns["inProgress"]} 
+              headerColor="rgb(70, 106, 252)" 
+              createTaskDialogRef={createTaskDialogRef}
+              viewTaskDialogRef={viewTaskDialogRef} 
+              setActiveColumn={setActiveColumn}
+              setActiveTask={setActiveTask}/>
+            <Column 
+              columnInfo={columns["inReview"]} 
+              headerColor="rgb(252, 194, 70)" 
+              createTaskDialogRef={createTaskDialogRef}
+              viewTaskDialogRef={viewTaskDialogRef} 
+              setActiveColumn={setActiveColumn}
+              setActiveTask={setActiveTask}/>
+            <Column 
+              columnInfo={columns["done"]} 
+              headerColor="rgb(39, 239, 136)" 
+              createTaskDialogRef={createTaskDialogRef} 
+              viewTaskDialogRef={viewTaskDialogRef}
+              setActiveColumn={setActiveColumn}
+              setActiveTask={setActiveTask}/>
           </div>
         </DragDropContext>
 
@@ -140,6 +168,11 @@ function App() {
           columnInfo={columns[activeColumn]}
           setActiveColumn={setActiveColumn}
           addNewTask={addNewTask}
+          />
+        
+        <ViewTaskModal 
+          ref={viewTaskDialogRef} 
+          task={activeTask}
           />
       </div>
   )

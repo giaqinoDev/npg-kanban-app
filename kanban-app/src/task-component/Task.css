@@ -10,5 +10,14 @@
     padding: 2px 8px;
     border-style: none;
     border-radius: 5px;
-    background-color: rgb(155, 154, 154);
+}
+
+.op-icon{
+    margin: 0px 2px;
+    color: #818181;
+    cursor: pointer;
+}
+
+.op-icon:hover{
+    color: #545454;
 }

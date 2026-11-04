@@ -6,6 +6,8 @@
     width: 35dvw;
     border-radius: 8px;
     border-style: none;
+    animation: modalOpen 150ms ease-out forwards;
+
 }
 .exit-modal-icon{
     margin-left: auto;
@@ -49,4 +51,15 @@
     margin: 5px;
     margin-left: auto;
     cursor: pointer;
+}
+
+@keyframes modalOpen {
+    from {
+        opacity: 0;
+        transform: scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }

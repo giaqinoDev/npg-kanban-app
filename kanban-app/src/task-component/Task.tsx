@@ -1,11 +1,15 @@
 import type { KanbanTask } from "./KanbanTask";
 import { IoCalendarClearOutline } from "react-icons/io5";
+import { FaRegEye } from "react-icons/fa";
+import { FaEdit } from "react-icons/fa";
+
 
 import "./Task.css"
+import type { RefObject } from "react";
 interface TaskProps{
     task: KanbanTask
-    // handleDragOver: (event: React.DragEvent<HTMLDivElement>) => void
-    // handleDrop: (event: React.DragEvent<HTMLDivElement>, columnId: ColumnId) => void
+    setActiveTask: React.Dispatch<React.SetStateAction<KanbanTask|null>>
+    viewTaskDialogRef: RefObject<HTMLDialogElement | null>
 }
 
 function formatDate(date: string){
@@ -18,7 +22,11 @@ function formatDate(date: string){
     return formattedDate;
 }
 
-function Task({task} : TaskProps){
+function handleViewClick({task, setActiveTask, viewTaskDialogRef}: TaskProps){
+    setActiveTask(task);
+    viewTaskDialogRef.current?.showModal();
+}
+function Task({task, setActiveTask, viewTaskDialogRef} : TaskProps){
     return (
        <div className="task-container">
             <div style={{"display":"flex", "alignItems":"cener"}}>
@@ -30,6 +38,13 @@ function Task({task} : TaskProps){
             <div style={{"display": "flex", "alignItems": "center"}}>
                 <IoCalendarClearOutline style={{"width":"15px", "height": "auto"}}/>
                 <p style={{"margin": "0px", "marginLeft":"5px", "fontSize":"small"}}>{formatDate(task.end_date)}</p>
+            </div>
+            <div style={{"display": "flex", "alignItems":"center"}}>
+                <div style={{"marginLeft":"auto"}}>
+                    <FaEdit className="op-icon"/>
+                    <FaRegEye className="op-icon" onClick={() => handleViewClick({task, setActiveTask, viewTaskDialogRef})}/>
+                </div>
+                
             </div>
         </div>
     );
