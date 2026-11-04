@@ -11,11 +11,12 @@ interface ColumnProp{
     headerColor: string
     createTaskDialogRef: RefObject<HTMLDialogElement | null>
     viewTaskDialogRef: RefObject<HTMLDialogElement | null>
+    updateTaskDialogRef: RefObject<HTMLDialogElement | null>
     setActiveColumn: React.Dispatch<React.SetStateAction<ColumnId>>
     setActiveTask: React.Dispatch<React.SetStateAction<KanbanTask|null>>
 }
 
-function Column({columnInfo, headerColor, createTaskDialogRef, viewTaskDialogRef, setActiveColumn, setActiveTask} : ColumnProp){
+function Column({columnInfo, headerColor, createTaskDialogRef, viewTaskDialogRef, updateTaskDialogRef, setActiveColumn, setActiveTask} : ColumnProp){
     return(
         <div className="column-container">
             <div className="column-header" style={{"backgroundColor": headerColor}}>
@@ -48,7 +49,7 @@ function Column({columnInfo, headerColor, createTaskDialogRef, viewTaskDialogRef
                                             {...provided.draggableProps}
                                             {...provided.dragHandleProps}
                                         >
-                                            <Task task={task} setActiveTask={setActiveTask} viewTaskDialogRef={viewTaskDialogRef}/>
+                                            <Task task={task} setActiveTask={setActiveTask} viewTaskDialogRef={viewTaskDialogRef} updateTaskDialogRef={updateTaskDialogRef}/>
                                         </div>
                                     )}
                                     

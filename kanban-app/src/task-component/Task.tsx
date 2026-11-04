@@ -10,6 +10,7 @@ interface TaskProps{
     task: KanbanTask
     setActiveTask: React.Dispatch<React.SetStateAction<KanbanTask|null>>
     viewTaskDialogRef: RefObject<HTMLDialogElement | null>
+    updateTaskDialogRef: RefObject<HTMLDialogElement | null>
 }
 
 function formatDate(date: string){
@@ -22,11 +23,7 @@ function formatDate(date: string){
     return formattedDate;
 }
 
-function handleViewClick({task, setActiveTask, viewTaskDialogRef}: TaskProps){
-    setActiveTask(task);
-    viewTaskDialogRef.current?.showModal();
-}
-function Task({task, setActiveTask, viewTaskDialogRef} : TaskProps){
+function Task({task, setActiveTask, viewTaskDialogRef, updateTaskDialogRef} : TaskProps){
     return (
        <div className="task-container">
             <div style={{"display":"flex", "alignItems":"cener"}}>
@@ -41,8 +38,14 @@ function Task({task, setActiveTask, viewTaskDialogRef} : TaskProps){
             </div>
             <div style={{"display": "flex", "alignItems":"center"}}>
                 <div style={{"marginLeft":"auto"}}>
-                    <FaEdit className="op-icon"/>
-                    <FaRegEye className="op-icon" onClick={() => handleViewClick({task, setActiveTask, viewTaskDialogRef})}/>
+                    <FaEdit className="op-icon" onClick={() => {
+                        setActiveTask(task);
+                        updateTaskDialogRef.current?.showModal();
+                    }}/>
+                    <FaRegEye className="op-icon" onClick={() => {
+                        setActiveTask(task);
+                        viewTaskDialogRef.current?.showModal();
+                    }}/>
                 </div>
                 
             </div>

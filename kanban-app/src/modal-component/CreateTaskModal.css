@@ -45,12 +45,25 @@
 }
 .button-container{
     display: flex;
+    width: fit-content;
+    margin-left: auto;
+    margin-top: 5px;
 }
 .create-task-button{
     padding: 10px;
-    margin: 5px;
-    margin-left: auto;
+    margin-left: 5px;
     cursor: pointer;
+    background-color: rgb(216, 216, 216);
+    border-style: none;
+    border-radius: 5px;
+}
+.delete-task-button{
+    padding: 10px;
+    margin-left: 5px;
+    cursor: pointer;
+    background-color: rgb(255, 164, 164);
+    border-style: none;
+    border-radius: 5px;
 }
 
 @keyframes modalOpen {

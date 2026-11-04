@@ -7,14 +7,16 @@ import CreateTaskModal from "./modal-component/CreateTaskModal";
 import { DragDropContext } from "@hello-pangea/dnd";
 import type { DropResult } from "@hello-pangea/dnd";
 import ViewTaskModal from "./modal-component/ViewTaskModal";
+import UpdateTaskModal from "./modal-component/UpdateTaskModal";
 
 //Return copies of the tasks with their position (and category) matching their index in the column
 function reindexTasks(tasks: KanbanTask[], category: ColumnId): KanbanTask[]{
-  return tasks.map((task, index) => 
-    task.position === index && task.category === category
-      ? task
-      : new KanbanTask(task.id, task.title, category, task.start_date, task.end_date, task.content, task.priority, index)
-  );
+  return tasks.map((task, index) => {
+    if(task.position === index && task.category === category){
+      return task;
+    }
+    return new KanbanTask(task.id, task.title, category, task.start_date, task.end_date, task.content, task.priority, index)
+  });
 }
 
 function App() {
@@ -45,6 +47,7 @@ function App() {
   const [activeColumn, setActiveColumn] = useState<ColumnId>("todo");
   const createTaskDialogRef = useRef<HTMLDialogElement>(null);
   const viewTaskDialogRef = useRef<HTMLDialogElement>(null);
+  const updateTaskDialogRef = useRef<HTMLDialogElement>(null);
   const [activeTask, setActiveTask] = useState<KanbanTask|null>(null);
 
   function handleDragEnd(result: DropResult){
@@ -116,6 +119,56 @@ function App() {
     });
   }
 
+  function replaceTask(updatedTask: KanbanTask) {
+      setColumns((prev) => {
+          //find the column currently containing the task
+          const originalColumnId = (Object.keys(prev) as ColumnId[]).find(columnId => prev[columnId].items.some(task => task.id === updatedTask.id));
+
+          if (!originalColumnId){
+            return prev;
+          }
+
+          const newColumnId = updatedTask.category;
+
+          //remove the original task
+          const originalItems = prev[originalColumnId].items.filter(task => task.id !== updatedTask.id);
+
+          //Same Column: replace the task in its existing position
+          if(originalColumnId == newColumnId) {
+              const updatedItems = [...prev[newColumnId].items];
+              const taskIndex = updatedItems.findIndex((task) => task.id == updatedTask.id);
+
+              updatedItems[taskIndex] = updatedTask;
+
+              return {
+                  ...prev,
+                  [newColumnId]: {
+                      ...prev[newColumnId],
+                      items: updatedItems
+                  }
+              };
+          }
+
+          //Different column: remove from original and append to destination
+          const destinationItems = [
+              ...prev[newColumnId].items,
+              updatedTask
+          ];
+
+          return {
+              ...prev,
+              [originalColumnId]: {
+                  ...prev[originalColumnId],
+                  items: reindexTasks(originalItems, originalColumnId)
+              },
+              [newColumnId]: {
+                  ...prev[newColumnId],
+                  items: reindexTasks(destinationItems, newColumnId)
+              }
+          };
+      });
+  }
+
   function removeTask(columnId : ColumnId, taskId : string){
     setColumns(prev => ({
       ...prev,
@@ -136,13 +189,17 @@ function App() {
               headerColor="rgb(252, 70, 70)" 
               createTaskDialogRef={createTaskDialogRef} 
               viewTaskDialogRef={viewTaskDialogRef}
+              updateTaskDialogRef={updateTaskDialogRef}
               setActiveColumn={setActiveColumn}
-              setActiveTask={setActiveTask}/>
+              setActiveTask={setActiveTask}
+              />
+              
             <Column 
               columnInfo={columns["inProgress"]} 
               headerColor="rgb(70, 106, 252)" 
               createTaskDialogRef={createTaskDialogRef}
-              viewTaskDialogRef={viewTaskDialogRef} 
+              viewTaskDialogRef={viewTaskDialogRef}
+              updateTaskDialogRef={updateTaskDialogRef} 
               setActiveColumn={setActiveColumn}
               setActiveTask={setActiveTask}/>
             <Column 
@@ -150,6 +207,7 @@ function App() {
               headerColor="rgb(252, 194, 70)" 
               createTaskDialogRef={createTaskDialogRef}
               viewTaskDialogRef={viewTaskDialogRef} 
+              updateTaskDialogRef={updateTaskDialogRef} 
               setActiveColumn={setActiveColumn}
               setActiveTask={setActiveTask}/>
             <Column 
@@ -157,6 +215,7 @@ function App() {
               headerColor="rgb(39, 239, 136)" 
               createTaskDialogRef={createTaskDialogRef} 
               viewTaskDialogRef={viewTaskDialogRef}
+              updateTaskDialogRef={updateTaskDialogRef} 
               setActiveColumn={setActiveColumn}
               setActiveTask={setActiveTask}/>
           </div>
@@ -174,6 +233,13 @@ function App() {
           ref={viewTaskDialogRef} 
           task={activeTask}
           />
+        
+        <UpdateTaskModal
+          ref={updateTaskDialogRef}
+          task={activeTask}
+          replaceTask={replaceTask}
+          removeTask={removeTask}
+        />
       </div>
   )
 }
