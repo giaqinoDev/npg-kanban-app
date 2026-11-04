@@ -20,7 +20,7 @@ function Column({columnInfo, headerColor, createTaskDialogRef, viewTaskDialogRef
     return(
         <div className="column-container">
             <div className="column-header" style={{"backgroundColor": headerColor}}>
-                <p>{columnInfo.name}</p>
+                <p style={{ fontWeight: "bold" }}>{columnInfo.name}</p>
                 <div style={{"marginLeft":"auto", "display":"flex"}}>
                     <p style={{"marginRight":"10px"}}>{columnInfo.items.length}</p>
                     <FaPlus className="create-new-task-icon" onClick={() => {
