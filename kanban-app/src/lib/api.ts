@@ -1,5 +1,5 @@
 import { supabase } from "./supabaseClient";
-import type { Label, NewTask, TaskChanges, TaskShape } from "./types";
+import type { Category, Label, NewTask, TaskChanges, TaskShape } from "./types";
 
 type TaskRow = Omit<TaskShape, 'labels'> & {
     tasks_labels: {

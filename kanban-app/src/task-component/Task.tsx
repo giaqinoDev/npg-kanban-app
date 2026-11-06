@@ -1,4 +1,3 @@
-import type { KanbanTask } from "./KanbanTask";
 import { IoCalendarClearOutline } from "react-icons/io5";
 import { FaRegEye } from "react-icons/fa";
 import { FaEdit } from "react-icons/fa";
@@ -9,7 +8,7 @@ import type { RefObject } from "react";
 import type { TaskShape } from "../lib/types";
 interface TaskProps{
     task: TaskShape
-    setActiveTask: React.Dispatch<React.SetStateAction<KanbanTask|null>>
+    setActiveTask: React.Dispatch<React.SetStateAction<TaskShape|null>>
     viewTaskDialogRef: RefObject<HTMLDialogElement | null>
     updateTaskDialogRef: RefObject<HTMLDialogElement | null>
 }
