@@ -1,14 +1,18 @@
-import type { KanbanTask } from "../task-component/KanbanTask";
+import type { Category, TaskShape } from "../lib/types";
 
-export type ColumnId = "todo" | "inProgress" | "inReview" | "done";
 export class KanbanColumn{
     name: string;
-    id: ColumnId;
-    items: KanbanTask[]
+    category: Category;
+    tasks: TaskShape[] | null
 
-    constructor(name: string, id: ColumnId, items: KanbanTask[]){
+    
+    constructor(name: string, category: Category, tasks: TaskShape[] | null){
         this.name = name;
-        this.id = id;
-        this.items = items;
+        this.category = category;
+        this.tasks = tasks;
+    }
+
+    setTasks(tasks: TaskShape[] | null){
+        this.tasks = tasks;
     }
 }

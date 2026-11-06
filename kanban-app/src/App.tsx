@@ -1,6 +1,5 @@
-import { useRef, useState } from "react"
-import { KanbanColumn, type ColumnId } from "./column-component/KanbanColumn";
-import { KanbanTask } from "./task-component/KanbanTask";
+import { useEffect, useRef, useState } from "react"
+import { KanbanColumn } from "./column-component/KanbanColumn";
 import Column from "./column-component/Column";
 import "./App.css";
 import CreateTaskModal from "./modal-component/CreateTaskModal";
@@ -8,184 +7,229 @@ import { DragDropContext } from "@hello-pangea/dnd";
 import type { DropResult } from "@hello-pangea/dnd";
 import ViewTaskModal from "./modal-component/ViewTaskModal";
 import UpdateTaskModal from "./modal-component/UpdateTaskModal";
+import { Categories, type Category, type NewTask, type TaskShape } from "./lib/types";
+import { ensureSession } from "./lib/auth";
+import { createTask, deleteTask, fetchTasks, moveTask, updateTask } from "./lib/api";
 
-//Return copies of the tasks with their position (and category) matching their index in the column
-function reindexTasks(tasks: KanbanTask[], category: ColumnId): KanbanTask[]{
+const column_titles: Record<Category, string> = {
+  todo: "To Do",
+  inProgress: "In Progress",
+  inReview: "In Review",
+  done: "Done"
+}
+
+function buildColumns(tasks: TaskShape[]): Record<Category, KanbanColumn>{
+  const columns = {} as Record<Category, KanbanColumn>;
+  for(const category of Categories){
+    const columnTasks = tasks.filter((task) => task.category === category).sort((taskA, taskB) => taskA.position - taskB.position);
+    columns[category] = new KanbanColumn(column_titles[category], category, columnTasks);
+  }
+  return columns;
+}
+
+function reindexTasks(tasks: TaskShape[], category: Category): TaskShape[]{
   return tasks.map((task, index) => {
+
     if(task.position === index && task.category === category){
       return task;
     }
-    return new KanbanTask(task.id, task.title, category, task.start_date, task.end_date, task.content, task.priority, index)
+
+    const updatedTask: TaskShape = {
+      ...task,
+      position: index,
+      category
+    };
+
+    return updatedTask;
+      
   });
 }
 
 function App() {
 
-  const [columns, setColumns] = useState({
-    "todo": new KanbanColumn(
-      "To Do", 
-      "todo", 
-      [new KanbanTask("1", "Task 1", "todo", "2026-11-01", "2026-11-01", "Item 1", "low", 0), 
-      new KanbanTask("2", "Task 2", "todo", "2026-11-01", "2026-11-01", "Item 2", "low", 1)]),
-    "inProgress": new KanbanColumn(
-      "In Progress", 
-      "inProgress", 
-      [new KanbanTask("3", "Task 3", "inProgress", "2026-11-01", "2026-11-01", "Item 3", "medium", 0), 
-        new KanbanTask("4", "Task 4", "inProgress", "2026-11-01", "2026-11-01", "Item 4", "medium", 1)]),
-    "inReview": new KanbanColumn(
-      "In Review", 
-      "inReview", 
-      [new KanbanTask("5", "Task 5", "inReview", "2026-11-01", "2026-11-01", "Item 5", "low", 0), 
-        new KanbanTask("6", "Task 6", "inReview", "2026-11-01", "2026-11-01", "Item 6", "high", 1)]),
-    "done": new KanbanColumn(
-      "Done", 
-      "done", 
-      [new KanbanTask("7", "Task 7", "done", "2026-11-01", "2026-11-01", "Item 7", "high", 0), 
-        new KanbanTask("8", "Task 8", "done", "2026-11-01", "2026-11-01", "Item 8", "high", 1)])
-  });
-
-  const [activeColumn, setActiveColumn] = useState<ColumnId>("todo");
+  const [columns, setColumns] = useState(() => buildColumns([]));
+  const [loadingTasks, setLoadingTasks] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  const [activeColumn, setActiveColumn] = useState<Category>("todo");
   const createTaskDialogRef = useRef<HTMLDialogElement>(null);
   const viewTaskDialogRef = useRef<HTMLDialogElement>(null);
   const updateTaskDialogRef = useRef<HTMLDialogElement>(null);
-  const [activeTask, setActiveTask] = useState<KanbanTask|null>(null);
+  const [activeTask, setActiveTask] = useState<TaskShape|null>(null);
 
-  function handleDragEnd(result: DropResult){
-    const{source, destination} = result;
-
-    if(!destination){
-      return;
-    }
-    if(source.droppableId == destination.droppableId && source.index == destination.index){
-      return;
-    }
-
-    setColumns(prev => {
-      const sourceId = source.droppableId as keyof typeof prev;
-      const destinationId = destination.droppableId as keyof typeof prev;
-
-      //Create copy of original columns task array
-      const sourceItems = [...prev[sourceId].items];
-      //remove specific task from task array and return in new array
-      const [movedTask] = sourceItems.splice(source.index, 1);
-
-      //Re ordering in the same column
-      if(sourceId == destinationId){
-        //Insert moved task into new position (i.e destination.index)
-        sourceItems.splice(destination.index, 0, movedTask);
-        //return updated state
-        return {
-          ...prev,
-          [sourceId]:{
-            ...prev[sourceId],
-            items: reindexTasks(sourceItems, sourceId)
-          }
+  useEffect(() => {
+    async function setUpSession(){
+      try{
+        await ensureSession(); //sign in for user or create new session for new users
+        const tasks = await fetchTasks();
+        setColumns(buildColumns(tasks));
+      }
+      catch(error: any){
+        if(error){
+          setError(error.message);
+        }
+        else{
+          setError('Failed to load tasks');
         }
       }
-      //Moving tasks between columns
-      const destinationItems = [...prev[destinationId].items]
-      destinationItems.splice(destination.index, 0, movedTask);
-
-      //Reindex both columns (also updates the moved task's category to its new column)
-      return{
-        ...prev,
-        [sourceId]:{
-          ...prev[sourceId],
-          items: reindexTasks(sourceItems, sourceId)
-        },
-        [destinationId]:{
-          ...prev[destinationId],
-          items: reindexTasks(destinationItems, destinationId)
-        }
+      finally{
+        setLoadingTasks(false);
       }
-    })
+    }
+    setUpSession();
+  }, []);
+
+  async function reloadTasks(){
+    try{
+      setColumns(buildColumns(await fetchTasks()));
+    }
+    catch(error: any){
+      if(error){
+        setError(error.message);
+      }
+      else{
+        setError('Failed to load tasks');
+      }
+    }
   }
 
-  function addNewTask(newTask: KanbanTask | null){
-    if(!newTask || newTask.content.trim() == ""){
-      return;
-    }
+  async function handleDragEnd(result: DropResult) {
+    const { source, destination, draggableId } = result;
+    if (!destination) return;
+    if (source.droppableId === destination.droppableId && source.index === destination.index) return;
 
-    setColumns(prev => {
-      const columnId = newTask.category;
+    const sourceId = source.droppableId as Category;
+    const destinationId = destination.droppableId as Category;
+
+    setColumns((prev) => {
+      const sourceItems = [...(prev[sourceId].tasks ?? [])];
+      const [movedTask] = sourceItems.splice(source.index, 1);
+      if (!movedTask) return prev;
+
+      if (sourceId === destinationId) {
+        sourceItems.splice(destination.index, 0, movedTask);
+        return { ...prev, [sourceId]: { ...prev[sourceId], tasks: reindexTasks(sourceItems, sourceId) } };
+      }
+
+      const destinationItems = [...(prev[destinationId].tasks ?? [])];
+      destinationItems.splice(destination.index, 0, movedTask);
       return {
         ...prev,
-        [columnId]:{
-          ...prev[columnId],
-          //Append to the end of the column and assign its position from its index
-          items: reindexTasks([...prev[columnId].items, newTask], columnId)
-        }
-      }
+        [sourceId]: { ...prev[sourceId], tasks: reindexTasks(sourceItems, sourceId) },
+        [destinationId]: { ...prev[destinationId], tasks: reindexTasks(destinationItems, destinationId) },
+      };
     });
+
+    try {
+      await moveTask(draggableId, destinationId, destination.index);
+    } catch (error: any) {
+      setError(error?.message ?? 'Failed to move task');
+      reloadTasks();
+    }
   }
 
-  function replaceTask(updatedTask: KanbanTask) {
-      setColumns((prev) => {
-          //find the column currently containing the task
-          const originalColumnId = (Object.keys(prev) as ColumnId[]).find(columnId => prev[columnId].items.some(task => task.id === updatedTask.id));
-
-          if (!originalColumnId){
-            return prev;
-          }
-
-          const newColumnId = updatedTask.category;
-
-          //remove the original task
-          const originalItems = prev[originalColumnId].items.filter(task => task.id !== updatedTask.id);
-
-          //Same Column: replace the task in its existing position
-          if(originalColumnId == newColumnId) {
-              const updatedItems = [...prev[newColumnId].items];
-              const taskIndex = updatedItems.findIndex((task) => task.id == updatedTask.id);
-
-              updatedItems[taskIndex] = updatedTask;
-
-              return {
-                  ...prev,
-                  [newColumnId]: {
-                      ...prev[newColumnId],
-                      items: updatedItems
-                  }
-              };
-          }
-
-          //Different column: remove from original and append to destination
-          const destinationItems = [
-              ...prev[newColumnId].items,
-              updatedTask
-          ];
-
-          return {
-              ...prev,
-              [originalColumnId]: {
-                  ...prev[originalColumnId],
-                  items: reindexTasks(originalItems, originalColumnId)
-              },
-              [newColumnId]: {
-                  ...prev[newColumnId],
-                  items: reindexTasks(destinationItems, newColumnId)
-              }
-          };
-      });
-  }
-
-  function removeTask(columnId : ColumnId, taskId : string){
-    setColumns(prev => ({
-      ...prev,
-      [columnId]:{
-        ...prev[columnId],
-        //Filter out task from column and close the gap in positions
-        items: reindexTasks(prev[columnId].items.filter((task:KanbanTask) => task.id !== taskId), columnId)
+  async function addNewTask(input: NewTask): Promise<boolean>{
+    if(!input.title.trim()){
+      return false;
+    }
+    try{
+      const created = await createTask(input, (columns[input.category].tasks ?? []).length);
+      setColumns((prev) => ({
+        ...prev,
+        [created.category]: {
+          ...prev[created.category],
+          tasks: [...(prev[created.category].tasks ?? []), created]
+        }
+      }));
+      return true;
+    }
+    catch(error: any){
+      if(error){
+        setError(error.message);
       }
+      else{
+        setError('Failed to create task');
+      }
+      return false;
+    }
+  }
+
+  async function replaceTask(updatedTask: TaskShape): Promise<boolean> {
+    setError(null);
+    try {
+      const { title, priority, content, start_date, end_date } = updatedTask;
+      const saved = await updateTask(updatedTask.id, { title, priority, content, start_date, end_date });
+
+      const oldCategory = saved.category;
+      const newCategory = updatedTask.category;
+
+      if (oldCategory === newCategory) {
+        setColumns((prev) => ({
+          ...prev,
+          [oldCategory]: {
+            ...prev[oldCategory],
+            tasks: (prev[oldCategory].tasks ?? []).map((t) => (t.id === saved.id ? saved : t)),
+          },
+        }));
+        setActiveTask(saved);
+        return true;
+      }
+
+      const newIndex = columns[newCategory]?.tasks?.length;
+      await moveTask(saved.id, newCategory, newIndex as number);
+
+      setColumns((prev) => ({
+        ...prev,
+        [oldCategory]: {
+          ...prev[oldCategory],
+          tasks: reindexTasks((prev[oldCategory].tasks ?? []).filter((t) => t.id !== saved.id), oldCategory),
+        },
+        [newCategory]: {
+          ...prev[newCategory],
+          tasks: reindexTasks([...(prev[newCategory].tasks ?? []), saved], newCategory),
+        },
+      }));
+      setActiveTask({ ...saved, category: newCategory, position: newIndex as number });
+      return true;
+    } catch (error: any) {
+      setError(error?.message ?? 'Failed to save task');
+      reloadTasks();
+      return false;
+    }
+  }
+
+  async function removeTask(columnId: Category, taskId: string): Promise<boolean> {
+    setError(null);
+    setColumns((prev) => ({
+      ...prev,
+      [columnId]: {
+        ...prev[columnId],
+        tasks: reindexTasks((prev[columnId].tasks ?? []).filter((t) => t.id !== taskId), columnId),
+      },
     }));
+    try {
+      await deleteTask(taskId);
+      return true;
+    } catch (error: any) {
+      if(error){
+        setError(error.message);
+      }
+      else{
+        setError('Failed to delete task');
+        reloadTasks();
+      }
+      return false;
+    }
   }
 
   return (
       <div id="app-container">
+        {loadingTasks && <p>Loading…</p>}
+        {error && <p className="error">{error}</p>}
         <DragDropContext onDragEnd={handleDragEnd}>
           <div className="kanban-columns">
             <Column 
-              columnInfo={columns["todo"]} 
+              columnInfo={columns["todo"]}
               headerColor="rgb(252, 70, 70)" 
               createTaskDialogRef={createTaskDialogRef} 
               viewTaskDialogRef={viewTaskDialogRef}
@@ -224,7 +268,6 @@ function App() {
         <CreateTaskModal 
           ref={createTaskDialogRef} 
           activeColumn={activeColumn}
-          columnInfo={columns[activeColumn]}
           setActiveColumn={setActiveColumn}
           addNewTask={addNewTask}
           />
@@ -243,5 +286,6 @@ function App() {
       </div>
   )
 }
+
 
 export default App

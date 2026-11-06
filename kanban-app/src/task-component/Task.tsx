@@ -6,14 +6,18 @@ import { FaEdit } from "react-icons/fa";
 
 import "./Task.css"
 import type { RefObject } from "react";
+import type { TaskShape } from "../lib/types";
 interface TaskProps{
-    task: KanbanTask
+    task: TaskShape
     setActiveTask: React.Dispatch<React.SetStateAction<KanbanTask|null>>
     viewTaskDialogRef: RefObject<HTMLDialogElement | null>
     updateTaskDialogRef: RefObject<HTMLDialogElement | null>
 }
 
-function formatDate(date: string){
+function formatDate(date: string|null){
+    if(!date){
+        return;
+    }
     const formattedDate = new Date(`${date}T12:00:00`).toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",

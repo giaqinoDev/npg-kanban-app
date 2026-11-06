@@ -1,42 +1,63 @@
-import type { FormEvent, RefObject } from "react";
+import { useState, type FormEvent, type RefObject } from "react";
 import { RxCross2 } from "react-icons/rx";
 import "./CreateTaskModal.css"
 import { RiPencilAiFill } from "react-icons/ri";
-import type { ColumnId, KanbanColumn } from "../column-component/KanbanColumn";
-import { KanbanTask, type PriorityId } from "../task-component/KanbanTask";
+import type { Category, NewTask, Priority } from "../lib/types";
 
 interface CreateTaskModalProp{
     ref: RefObject<HTMLDialogElement | null>;
-    activeColumn: ColumnId;
-    columnInfo: KanbanColumn;
-    setActiveColumn: React.Dispatch<React.SetStateAction<ColumnId>>
-    addNewTask: (newTask: KanbanTask|null) => void;
+    activeColumn: Category;
+    setActiveColumn: React.Dispatch<React.SetStateAction<Category>>
+    addNewTask: (input: NewTask) => Promise<boolean>;
 }
 
-function CreateTaskModal({ref, activeColumn, setActiveColumn, addNewTask, columnInfo}: CreateTaskModalProp){
-
+function CreateTaskModal({ref, activeColumn, setActiveColumn, addNewTask}: CreateTaskModalProp){
+    const [submitting, setSubmitting] = useState(false);
+    const [formError, setFormError] = useState<string | null>(null);
+        
     function handleCategoryChange(event: React.ChangeEvent<HTMLSelectElement>){
-        setActiveColumn(event.target.value as ColumnId);
+        setActiveColumn(event.target.value as Category);
     }
 
-    function handleCreateNewTask(event: FormEvent<HTMLFormElement>){
+    async function handleCreateNewTask(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        const formData = new FormData(event.currentTarget);
+        const form = event.currentTarget; // keep a reference: currentTarget is null after an await
+        const formData = new FormData(form);
 
-        const newTask = new KanbanTask(
-            Date.now().toString(),
-            formData.get("title") as string,
-            formData.get("category") as ColumnId,
-            formData.get("start date") as string,
-            formData.get("end date") as string,
-            formData.get("description") as string,
-            formData.get("priority") as PriorityId,
-            columnInfo.items.length
-        );
+        const title = (formData.get("title") as string).trim();
+        // An empty date input gives "", but the database wants null for "no date"
+        const startDate = (formData.get("start date") as string) || null;
+        const endDate = (formData.get("end date") as string) || null;
 
-        addNewTask(newTask);
-        ref.current?.close();
+        if (!title) {
+            setFormError("Title can't be blank");
+            return;
+        }
+        if (startDate && endDate && endDate < startDate) {
+            setFormError("End date must be on or after the start date");
+            return;
+        }
+
+        const newTask: NewTask = {
+            title,
+            category: formData.get("category") as Category,
+            priority: formData.get("priority") as Priority,
+            start_date: startDate,
+            end_date: endDate,
+            content: (formData.get("description") as string) ?? "",
+        };
+
+        setFormError(null);
+        setSubmitting(true);
+        const saved = await addNewTask(newTask);
+        setSubmitting(false);
+
+        if (saved) {
+            form.reset();
+            ref.current?.close();
+        }
     }
+
     return(
         <dialog ref={ref} className="modal-container">
             <div className="modal-header">
@@ -74,8 +95,11 @@ function CreateTaskModal({ref, activeColumn, setActiveColumn, addNewTask, column
                 </div>
                 <p>Description:</p>
                 <textarea name="description" className="modal-input-field" rows={5} cols={40} placeholder="Type your task..."></textarea>
+                {formError && <p className="form-error">{formError}</p>}
                 <div className="button-container">
-                    <button className="create-task-button">Create Task</button>
+                    <button className="create-task-button" disabled={submitting}>
+                        {submitting ? "Creating…" : "Create Task"}
+                    </button>
                 </div>
             </form>
         </dialog>
