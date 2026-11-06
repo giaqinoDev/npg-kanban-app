@@ -1,6 +1,16 @@
 export type Category = 'todo' | 'inProgress' | 'inReview' | 'done';
 export type Priority = 'low' | 'medium' | 'high';
 export type LabelColor = 'gray' | 'red' | 'orange' | 'green' | 'blue' | 'purple';
+// Keys are the values allowed by the labels.color check constraint in the database
+export const LabelColorHex: Record<LabelColor, string> = {
+    red: "#EF4444",
+    orange: "#F97316",
+    green: "#22C55E",
+    blue: "#3B82F6",
+    purple: "#A855F7",
+    gray: "#6B7280"
+};
+export const LabelColors = Object.keys(LabelColorHex) as LabelColor[];
 export const Categories: Category[] = ['todo', 'inProgress', 'inReview', 'done'];
 
 export interface Label{

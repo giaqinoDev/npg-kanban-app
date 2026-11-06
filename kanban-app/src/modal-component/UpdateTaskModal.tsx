@@ -2,22 +2,26 @@ import { useEffect, useState, type ChangeEvent, type FormEvent, type RefObject }
 import { RxCross2 } from "react-icons/rx";
 import "./CreateTaskModal.css"
 import { FaEdit } from "react-icons/fa";
-import type { Category, Priority, TaskShape } from "../lib/types";
+import type { Category, Label, Priority, TaskShape } from "../lib/types";
+import LabelPicker from "../label-component/LabelPicker";
 
 interface UpdateTaskModalProp{
     task: TaskShape | null;
     ref: RefObject<HTMLDialogElement | null>;
     replaceTask: (updatedTask: TaskShape) => Promise<boolean>;
     removeTask: (columnId: Category, taskId: string) => Promise<boolean>;
+    labels: Label[];
+    labelCreationDialogRef: RefObject<HTMLDialogElement | null>;
 }
 
-function UpdateTaskModal({ref, task, replaceTask, removeTask}: UpdateTaskModalProp){
+function UpdateTaskModal({ref, task, replaceTask, removeTask, labels, labelCreationDialogRef}: UpdateTaskModalProp){
     const [titleVal, setTitleVal] = useState<string | undefined>(task?.title);
     const [categoryVal, setCategoryVal] = useState<Category | undefined>(task?.category);
     const [startDateVal, setStartDateVal] = useState<string | undefined | null>(task?.start_date);
     const [endDateVal, setEndDateVal] = useState<string | undefined | null>(task?.end_date);
     const [descriptionVal, setDescriptionVal] = useState<string | undefined>(task?.content);
     const [priorityVal, setPriorityVal] = useState<Priority | undefined>(task?.priority);
+    const [selectedLabelIds, setSelectedLabelIds] = useState<string[]>([]);
 
     const [submitting, setSubmitting] = useState(false);
     const [formError, setFormError] = useState<string | null>(null);
@@ -32,6 +36,7 @@ function UpdateTaskModal({ref, task, replaceTask, removeTask}: UpdateTaskModalPr
         setEndDateVal(task.end_date);
         setDescriptionVal(task.content);
         setPriorityVal(task.priority);
+        setSelectedLabelIds(task.labels.map((label) => label.id));
         setFormError(null);
     }, [task]);
 
@@ -53,7 +58,7 @@ function UpdateTaskModal({ref, task, replaceTask, removeTask}: UpdateTaskModalPr
         }
 
         // Copy the original task and override only the edited fields.
-        // id, created_by, position, labels and timestamps carry over unchanged.
+        // id, created_by, position and timestamps carry over unchanged.
         const updatedTask: TaskShape = {
             ...task,
             title,
@@ -62,6 +67,7 @@ function UpdateTaskModal({ref, task, replaceTask, removeTask}: UpdateTaskModalPr
             start_date: startDate,
             end_date: endDate,
             content: descriptionVal as string,
+            labels: labels.filter((label) => selectedLabelIds.includes(label.id)),
         };
 
         setFormError(null);
@@ -117,6 +123,12 @@ function UpdateTaskModal({ref, task, replaceTask, removeTask}: UpdateTaskModalPr
                     <p style={{"marginLeft": "20px"}}>End Date</p>
                     <input onChange={(event: ChangeEvent<HTMLInputElement>) => setEndDateVal(event.target.value)} value={endDateVal as string} name="end date" type="date" required></input>
                 </div>
+                <LabelPicker
+                    labels={labels}
+                    selectedIds={selectedLabelIds}
+                    setSelectedIds={setSelectedLabelIds}
+                    labelCreationDialogRef={labelCreationDialogRef}
+                />
                 <p>Description:</p>
                 <textarea onChange={(event: ChangeEvent<HTMLTextAreaElement>) => setDescriptionVal(event.target.value)} value={descriptionVal} name="description" className="modal-input-field" rows={5} cols={40} placeholder="Type your task..."></textarea>
                 {formError && <p className="form-error">{formError}</p>}

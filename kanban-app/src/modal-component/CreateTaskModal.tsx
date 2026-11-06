@@ -2,16 +2,20 @@ import { useState, type FormEvent, type RefObject } from "react";
 import { RxCross2 } from "react-icons/rx";
 import "./CreateTaskModal.css"
 import { RiPencilAiFill } from "react-icons/ri";
-import type { Category, NewTask, Priority } from "../lib/types";
+import type { Category, Label, NewTask, Priority } from "../lib/types";
+import LabelPicker from "../label-component/LabelPicker";
 
 interface CreateTaskModalProp{
     ref: RefObject<HTMLDialogElement | null>;
     activeColumn: Category;
     setActiveColumn: React.Dispatch<React.SetStateAction<Category>>
-    addNewTask: (input: NewTask) => Promise<boolean>;
+    addNewTask: (input: NewTask, labelIds: string[]) => Promise<boolean>;
+    labels: Label[];
+    labelCreationDialogRef: RefObject<HTMLDialogElement | null>;
 }
 
-function CreateTaskModal({ref, activeColumn, setActiveColumn, addNewTask}: CreateTaskModalProp){
+function CreateTaskModal({ref, activeColumn, setActiveColumn, addNewTask, labels, labelCreationDialogRef}: CreateTaskModalProp){
+    const [selectedLabelIds, setSelectedLabelIds] = useState<string[]>([]);
     const [submitting, setSubmitting] = useState(false);
     const [formError, setFormError] = useState<string | null>(null);
         
@@ -49,11 +53,13 @@ function CreateTaskModal({ref, activeColumn, setActiveColumn, addNewTask}: Creat
 
         setFormError(null);
         setSubmitting(true);
-        const saved = await addNewTask(newTask);
+        // A selected label may have been deleted since it was picked
+        const saved = await addNewTask(newTask, selectedLabelIds.filter((id) => labels.some((label) => label.id === id)));
         setSubmitting(false);
 
         if (saved) {
             form.reset();
+            setSelectedLabelIds([]);
             ref.current?.close();
         }
     }
@@ -93,6 +99,12 @@ function CreateTaskModal({ref, activeColumn, setActiveColumn, addNewTask}: Creat
                     <p style={{"marginLeft": "20px"}}>End Date</p>
                     <input name="end date" type="date" required></input>
                 </div>
+                <LabelPicker
+                    labels={labels}
+                    selectedIds={selectedLabelIds}
+                    setSelectedIds={setSelectedLabelIds}
+                    labelCreationDialogRef={labelCreationDialogRef}
+                />
                 <p>Description:</p>
                 <textarea name="description" className="modal-input-field" rows={5} cols={40} placeholder="Type your task..."></textarea>
                 {formError && <p className="form-error">{formError}</p>}

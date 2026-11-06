@@ -1,0 +1,37 @@
+.label-list{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 10px;
+}
+.label-chip{
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 8px;
+    border-radius: 5px;
+    font-size: small;
+    color: #333333;
+}
+.label-dot{
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.label-option{
+    background-color: transparent;
+    border: 1px solid rgb(216, 216, 216);
+    cursor: pointer;
+}
+.label-delete-button{
+    display: inline-flex;
+    padding: 0px;
+    border-style: none;
+    background-color: transparent;
+    color: #818181;
+    cursor: pointer;
+}
+.label-delete-button:hover{
+    color: #333333;
+}

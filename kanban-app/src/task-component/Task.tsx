@@ -6,6 +6,7 @@ import { FaEdit } from "react-icons/fa";
 import "./Task.css"
 import type { RefObject } from "react";
 import type { TaskShape } from "../lib/types";
+import LabelList from "../label-component/LabelList";
 interface TaskProps{
     task: TaskShape
     setActiveTask: React.Dispatch<React.SetStateAction<TaskShape|null>>
@@ -32,9 +33,10 @@ function Task({task, setActiveTask, viewTaskDialogRef, updateTaskDialogRef} : Ta
             <div style={{"display":"flex", "alignItems":"cener"}}>
                 <p>{task.title}</p>
                 <div className="priority-tag" style={{"backgroundColor" : task.priority == "low" ? "#ffed63" : task.priority == "high" ? "#ff6750" : "#c9c9c9"}}>
-                    <p style={{"margin":"0px", "fontSize": "small"}}>{task.priority}</p>
+                    <p style={{"margin":"0px", "fontSize": "small", "color": task.priority == "low" ? "#9e9026" : task.priority == "high" ? "#9f3e30" : "#5f5f5f"}}>{task.priority}</p>
                 </div>
             </div>
+            <LabelList labels={task.labels}/>
             <div style={{"display": "flex", "alignItems": "center"}}>
                 <IoCalendarClearOutline style={{"width":"15px", "height": "auto"}}/>
                 <p style={{"margin": "0px", "marginLeft":"5px", "fontSize":"small"}}>{formatDate(task.end_date)}</p>
