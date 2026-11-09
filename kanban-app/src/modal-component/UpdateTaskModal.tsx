@@ -80,14 +80,6 @@ function UpdateTaskModal({ref, task, replaceTask, removeTask, labels, labelCreat
         }
     }
 
-    // function handleDelete() {
-    //     if(!task){
-    //         return;
-    //     }
-    //     removeTask(task.category, task.id);
-    //     ref.current?.close();
-    // }
-
     return(
         <dialog ref={ref} className="modal-container">
             <div className="modal-header">
