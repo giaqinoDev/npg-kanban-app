@@ -30,7 +30,7 @@ function ViewTaskModal({ref, task}:ViewTaskModalProps){
                 <RxCross2 className="exit-modal-icon" onClick={() => ref.current?.close()}/>
             </div>
             <div>
-                <div className="priority-view-tag" style={{"backgroundColor" : task?.priority == "low" ? "#ffed63" : task?.priority == "high" ? "#ff6750" : "#c9c9c9"}}>
+                <div className="priority-view-tag" style={{"backgroundColor" : task?.priority == "low" ? "#ffed63" : task?.priority == "high" ? "#ff6750" : "#c9c9c9", "marginBottom": "10px"}}>
                     <p style={{"margin":"0px", "fontSize": "small"}}>{task?.priority}</p>
                 </div>
                 <LabelList labels={task?.labels ?? []}/>

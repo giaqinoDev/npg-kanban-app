@@ -1,4 +1,3 @@
-import type { ColumnId } from "../column-component/KanbanColumn";
 import type { Category, Priority } from "../lib/types";
 
 export type PriorityId = "low" | "medium" | "high";

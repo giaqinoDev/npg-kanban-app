@@ -4,4 +4,8 @@
 .kanban-columns{
   height: 100%;
   display: flex;
+  overflow-x: auto;
+  width: 100%;
+  justify-content: flex-start;
+  align-items: flex-start;
 }

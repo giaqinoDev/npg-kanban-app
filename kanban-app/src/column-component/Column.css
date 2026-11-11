@@ -1,16 +1,21 @@
 .column-container{
     background-color: rgb(242, 242, 242);
     margin: 10px;
-    width: 100%;
-    border-style: hidden;
+    width: 345px;
+    min-height: 300px;
+    height: fit-content;
+    flex-shrink: 0;
     border-radius: 8px;
-    box-sizing: border-box; 
+    box-sizing: border-box;
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
 .category-tasks{
-    height: 100%;
+    min-height: 240px;
+    height: auto;
+    overflow: visible;
+    padding: 10px;
 }
 .column-header{
     color: white;

@@ -10,7 +10,7 @@ function SearchBar({searchQuery, setSearchQuery}: SearchBarProps){
                 type="search"
                 aria-label="Search tasks"
                 placeholder="Title, priority, or label"
-                style={{"padding":"10px"}}
+                style={{"padding":"10px", "borderRadius": "5px", "borderStyle": "solid", "borderColor": "black", "width": "250px", "marginRight": "10px"}}
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
             />
